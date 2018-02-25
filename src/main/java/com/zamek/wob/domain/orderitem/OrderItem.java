@@ -1,14 +1,13 @@
 package com.zamek.wob.domain.orderitem;
 
-import java.io.Serializable;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -17,8 +16,9 @@ import com.zamek.wob.util.HasLogger;
 
 @Entity
 @Table(name=OrderItem.TABLE_NAME)
-public class OrderItem implements Serializable, HasLogger {
+public class OrderItem implements HasLogger {
 	
+	@SuppressWarnings("unused")
 	private final static boolean DEBUG=true;
 	
 	public final static String TABLE_NAME = "order_item"; //$NON-NLS-1$
@@ -39,33 +39,31 @@ public class OrderItem implements Serializable, HasLogger {
 
 	@Id
 	@Column(name=COL_ORDER_ITEM_ID, unique=true, nullable=false, updatable=false)
-	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="order_item_gen")
 	private Long id;
 
-	@ManyToOne
-	@Column(name=COL_ORDER_ID, nullable=false)
+	@ManyToOne(cascade=CascadeType.ALL)
+	@JoinColumn(name=COL_ORDER_ID)
 	private Order order;
 
 	@Column(name=COL_SALE_PRICE, nullable=false)
-	private int salePrice;
+	private float salePrice;
 	
 	@Column(name=COL_SHIPPING_PRICE, nullable=false)
-	private int shippingPrice;
+	private float shippingPrice;
 	
 	@Column(name=COL_TOTAL_ITEM_PRICE, nullable=false)
-	private int totalItemPrice;
+	private float totalItemPrice;
 	
-	@Column(name=COL_SKU)
+	@Column(name=COL_SKU, length=50)
 	private String SKU;
 	
 	@Enumerated(EnumType.ORDINAL)
+	@Column(name=COL_STATUS)
 	private OrderItemStatus status;
-	
-	
+		
 	public OrderItem() {
 		//NC
 	}
-
 
 	/**
 	 * @return the id
@@ -74,7 +72,6 @@ public class OrderItem implements Serializable, HasLogger {
 		return this.id;
 	}
 
-
 	/**
 	 * @param id the id to set
 	 */
@@ -82,14 +79,12 @@ public class OrderItem implements Serializable, HasLogger {
 		this.id = id;
 	}
 
-
 	/**
 	 * @return the order
 	 */
 	public Order getOrder() {
 		return this.order;
 	}
-
 
 	/**
 	 * @param order the order to set
@@ -102,7 +97,7 @@ public class OrderItem implements Serializable, HasLogger {
 	/**
 	 * @return the salePrice
 	 */
-	public int getSalePrice() {
+	public float getSalePrice() {
 		return this.salePrice;
 	}
 
@@ -110,7 +105,7 @@ public class OrderItem implements Serializable, HasLogger {
 	/**
 	 * @param salePrice the salePrice to set
 	 */
-	public void setSalePrice(int salePrice) {
+	public void setSalePrice(float salePrice) {
 		this.salePrice = salePrice;
 	}
 
@@ -118,7 +113,7 @@ public class OrderItem implements Serializable, HasLogger {
 	/**
 	 * @return the shippingPrice
 	 */
-	public int getShippingPrice() {
+	public float getShippingPrice() {
 		return this.shippingPrice;
 	}
 
@@ -126,7 +121,7 @@ public class OrderItem implements Serializable, HasLogger {
 	/**
 	 * @param shippingPrice the shippingPrice to set
 	 */
-	public void setShippingPrice(int shippingPrice) {
+	public void setShippingPrice(float shippingPrice) {
 		this.shippingPrice = shippingPrice;
 	}
 
@@ -166,14 +161,14 @@ public class OrderItem implements Serializable, HasLogger {
 	/**
 	 * @return the totalItemPrice
 	 */
-	public int getTotalItemPrice() {
+	public float getTotalItemPrice() {
 		return this.totalItemPrice;
 	}
 
 	/**
 	 * @param totalItemPrice the totalItemPrice to set
 	 */
-	public void setTotalItemPrice(int totalItemPrice) {
+	public void setTotalItemPrice(float totalItemPrice) {
 		this.totalItemPrice = totalItemPrice;
 	}
 
@@ -188,10 +183,10 @@ public class OrderItem implements Serializable, HasLogger {
 		result = prime * result + ((this.SKU == null) ? 0 : this.SKU.hashCode());
 		result = prime * result + ((this.id == null) ? 0 : this.id.hashCode());
 		result = prime * result + ((this.order == null) ? 0 : this.order.hashCode());
-		result = prime * result + this.salePrice;
-		result = prime * result + this.shippingPrice;
+		result = prime * result + Float.floatToIntBits(this.salePrice);
+		result = prime * result + Float.floatToIntBits(this.shippingPrice);
 		result = prime * result + ((this.status == null) ? 0 : this.status.hashCode());
-		result = prime * result + this.totalItemPrice;
+		result = prime * result + Float.floatToIntBits(this.totalItemPrice);
 		return result;
 	}
 
@@ -223,17 +218,15 @@ public class OrderItem implements Serializable, HasLogger {
 				return false;
 		} else if (!this.order.equals(other.order))
 			return false;
-		if (this.salePrice != other.salePrice)
+		if (Float.floatToIntBits(this.salePrice) != Float.floatToIntBits(other.salePrice))
 			return false;
-		if (this.shippingPrice != other.shippingPrice)
+		if (Float.floatToIntBits(this.shippingPrice) != Float.floatToIntBits(other.shippingPrice))
 			return false;
 		if (this.status != other.status)
 			return false;
-		if (this.totalItemPrice != other.totalItemPrice)
+		if (Float.floatToIntBits(this.totalItemPrice) != Float.floatToIntBits(other.totalItemPrice))
 			return false;
 		return true;
 	}
-	
-	
 	
 }

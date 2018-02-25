@@ -1,24 +1,24 @@
 package com.zamek.wob.domain.order;
 
-import java.io.Serializable;
+
 import java.time.LocalDate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.zamek.wob.util.HasLogger;
 
+
 @Entity
 @Table(name=Order.TABLE_NAME)
-public class Order implements Serializable, HasLogger {
+public class Order implements HasLogger {
 
+	@SuppressWarnings("unused")
 	private final static boolean DEBUG=true;
 	
-	public final static String TABLE_NAME = "order"; //$NON-NLS-1$
+	public final static String TABLE_NAME = "order_"; //$NON-NLS-1$  order is not an acceptable name for database
 	
 	public final static String COL_ID = "OrderId"; //$NON-NLS-1$
 	
@@ -38,17 +38,17 @@ public class Order implements Serializable, HasLogger {
 	@Column(name=COL_ID, unique=true, nullable=false, updatable=false)
 	private Long id;
 	
-	@Column(name=COL_BUYER_NAME, nullable=false)  // unique=true?
+	@Column(name=COL_BUYER_NAME, nullable=false, length=50)  // unique=true?
 	private String buyerName;
 	
-	@Column(name=COL_BUYER_EMAIL, nullable=false) // unique=true?
+	@Column(name=COL_BUYER_EMAIL, nullable=false, length=50) // unique=true?
  	private String buyerEmail;  
 	
 	@Column(name=COL_ORDER_DATE, nullable=false)
 	private LocalDate orderDate;
 	
 	@Column(name=COL_ORDER_TOTAL_VALUE)
-	private int orderTotalValue;
+	private float orderTotalValue;
 	
 	@Column(name=COL_ADDRESS, nullable=false)
 	private String address;
@@ -119,14 +119,14 @@ public class Order implements Serializable, HasLogger {
 	/**
 	 * @return the orderTotalValue
 	 */
-	public int getOrderTotalValue() {
+	public float getOrderTotalValue() {
 		return this.orderTotalValue;
 	}
 
 	/**
 	 * @param orderTotalValue the orderTotalValue to set
 	 */
-	public void setOrderTotalValue(int orderTotalValue) {
+	public void setOrderTotalValue(float orderTotalValue) {
 		this.orderTotalValue = orderTotalValue;
 	}
 
@@ -178,7 +178,7 @@ public class Order implements Serializable, HasLogger {
 		result = prime * result + ((this.buyerName == null) ? 0 : this.buyerName.hashCode());
 		result = prime * result + ((this.id == null) ? 0 : this.id.hashCode());
 		result = prime * result + ((this.orderDate == null) ? 0 : this.orderDate.hashCode());
-		result = prime * result + this.orderTotalValue;
+		result = prime * result + Float.floatToIntBits(this.orderTotalValue);
 		result = prime * result + ((this.postCode == null) ? 0 : this.postCode.hashCode());
 		return result;
 	}
@@ -220,7 +220,7 @@ public class Order implements Serializable, HasLogger {
 				return false;
 		} else if (!this.orderDate.equals(other.orderDate))
 			return false;
-		if (this.orderTotalValue != other.orderTotalValue)
+		if (Float.floatToIntBits(this.orderTotalValue) != Float.floatToIntBits(other.orderTotalValue))
 			return false;
 		if (this.postCode == null) {
 			if (other.postCode != null)
@@ -229,7 +229,5 @@ public class Order implements Serializable, HasLogger {
 			return false;
 		return true;
 	}
-	
-	
 	
 }

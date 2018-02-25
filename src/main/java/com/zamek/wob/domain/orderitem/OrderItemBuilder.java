@@ -2,11 +2,13 @@ package com.zamek.wob.domain.orderitem;
 
 import java.util.Optional;
 
+import com.zamek.wob.domain.ConvertException;
 import com.zamek.wob.domain.order.Order;
 import com.zamek.wob.util.HasLogger;
 
 public class OrderItemBuilder implements HasLogger {
 
+	@SuppressWarnings("unused")
 	private final static boolean DEBUG = true;
 	
 	private OrderItem item;
@@ -15,12 +17,14 @@ public class OrderItemBuilder implements HasLogger {
 		this.item = new OrderItem();
 	}
 
-	public OrderItemBuilder itemId(String id) {
+	public OrderItemBuilder itemId(String id) throws ConvertException {
 		try {
-			this.item.setId(Long.valueOf(Long.parseLong(id)));
+			long li = Long.parseLong(id);
+			this.item.setId(Long.valueOf(li));
+			
 		}
 		catch (NumberFormatException e) {
-			getLogger().warn(String.format("OrderItemBuilder.itemId format exception : %s at: %s", e.getMessage(), id)); //$NON-NLS-1$
+			throw new ConvertException("OrderItemId error:"+e.getMessage()); //$NON-NLS-1$
 		}
 		return this;
 	}
@@ -30,33 +34,44 @@ public class OrderItemBuilder implements HasLogger {
 		return this;
 	}
 
-	public OrderItemBuilder salePrice(String salePrice) {
-		try {			
-			this.item.setSalePrice(Integer.parseInt(salePrice));
-		}
-		catch (NumberFormatException e) {
-			getLogger().warn(String.format("OrderItemBuilder.salePrice format exception : %s at: %s", e.getMessage(), salePrice)); //$NON-NLS-1$
-		}
-		return this;
-	}
-	
-	public OrderItemBuilder shippingPrice(String shippingPrice) {
-		try {			
-			this.item.setShippingPrice(Integer.parseInt(shippingPrice));
-		}
-		catch (NumberFormatException e) {
-			getLogger().warn(String.format("OrderItemBuilder.shippingPrice format exception : %s at: %s", e.getMessage(), shippingPrice)); //$NON-NLS-1$
-		}
-		return this;
-	}
-	
-	public OrderItemBuilder totalItemPrice(String totalItemPrice) {
+	public OrderItemBuilder salePrice(String salePrice) throws ConvertException {
 		try {
-			this.item.setTotalItemPrice(Integer.parseInt(totalItemPrice));
+			float sp = Float.parseFloat(salePrice);
+			if (sp < 1.0f)
+				throw new ConvertException("salePrice is less than 1.0"); //$NON-NLS-1$
+			this.item.setSalePrice(sp);
 		}
 		catch (NumberFormatException e) {
-			getLogger().warn(String.format("OrderItemBuilder.totalItemPrice format exception : %s at: %s", e.getMessage(), totalItemPrice)); //$NON-NLS-1$
-		}			
+			throw new ConvertException("salePrice number format error:"+e.getMessage()); //$NON-NLS-1$
+		}
+		return this;
+	}
+	
+	public OrderItemBuilder shippingPrice(String shippingPrice) throws ConvertException {
+		try {
+			float sp = Float.parseFloat(shippingPrice);
+			if (sp<0.0f)
+				throw new ConvertException("shippingPrice is less than 0.0"); //$NON-NLS-1$
+			this.item.setShippingPrice(sp);
+			
+		}
+		catch (NumberFormatException e) {
+			throw new ConvertException("shippingPrice number format error:"+e.getMessage()); //$NON-NLS-1$
+		}
+		return this;
+	}
+	
+	public OrderItemBuilder totalItemPrice(String totalItemPrice) throws ConvertException {
+		try {
+			float tp = Float.parseFloat(totalItemPrice);
+			if (tp<=1.0f)
+				throw new ConvertException("totalItemPrice is less than 1.0"); //$NON-NLS-1$
+				
+			this.item.setTotalItemPrice(tp);
+		}
+		catch (NumberFormatException e) {
+			throw new ConvertException("totalItemPrice number format error:"+e.getMessage()); //$NON-NLS-1$
+		}
 		return this;
 	}
 	
@@ -70,15 +85,29 @@ public class OrderItemBuilder implements HasLogger {
 		return this;
 	}
 
+	/**
+	 * You can make some restrictions for the item for example totalPrice = salePrice+shippingPrice and etc. 
+	 * 
+	 * @return true if item is correct or false if something went wrong
+	 */
 	private boolean check() {
 		return this.item.getOrder() != null
-				&& this.item.getSalePrice() >= 0
-				&& this.item.getShippingPrice() >= 0
-				&& this.item.getTotalItemPrice() >= 0
+				&& this.item.getId() != null 
+				&& this.item.getSalePrice() >= 1.0f
+				&& this.item.getShippingPrice() >= 0.0f
+				&& this.item.getTotalItemPrice() >= 0.0f
 				&& this.item.getStatus() != OrderItemStatus.UNKNOWN;
 	}
 	
+	private void postCalculation() {
+		this.item.setTotalItemPrice(this.item.getSalePrice() + this.item.getShippingPrice());
+	}
+	
 	public Optional<OrderItem> get() {
-		return check() ? Optional.of(this.item) : Optional.empty();
+		if (!check())
+			return Optional.empty();
+		
+		postCalculation();
+		return Optional.of(this.item);
 	}
 }

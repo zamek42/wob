@@ -2,7 +2,31 @@ package com.zamek.wob.domain.orderitem;
 
 public enum OrderItemStatus {
 	
-	IN_STOCK, OUT_OF_STOCK, UNKNOWN;
+	IN_STOCK() {
+
+		@Override
+		public String toString() {
+			return ST_IN_STOCK;
+		}
+		
+	}, 
+	
+	OUT_OF_STOCK() {
+
+		@Override
+		public String toString() {
+			return ST_OUT_OF_STOCK;
+		}
+		
+	}, 
+	
+	UNKNOWN() {
+		@Override
+		public String toString() {
+			return "Unknown"; //$NON-NLS-1$
+		}
+
+	};
 
 	public final static String ST_IN_STOCK = "INSTOCK"; //$NON-NLS-1$
 	
@@ -15,6 +39,9 @@ public enum OrderItemStatus {
 		default : return UNKNOWN;
 		}
 	}
+	
+	@Override
+	public abstract String toString();
 	
 	
 }

@@ -1,3 +1,0 @@
-entity-packages: com.zamek.wob.domain
-transactional-packages:com.zamek.wob
-querybean-packages: com.zamek.wob

@@ -1,16 +1,20 @@
 package com.zamek.wob;
 
-import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.runner.Runner;
+import org.junit.runners.Suite;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
+import com.zamek.wob.domain.CSVTest;
+import com.zamek.wob.domain.DbTest;
+import com.zamek.wob.domain.DomainTest;
+
+@RunWith(Runner.class)
+@Suite.SuiteClasses ({
+//	DomainTest.class
+//	DbTest.class
+	CSVTest.class
+})
+
 public class WobApplicationTests {
-
-	@Test
-	public void contextLoads() {
-	}
 
 }

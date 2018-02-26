@@ -4,10 +4,12 @@ package com.zamek.wob.domain.order;
 import java.time.LocalDate;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.zamek.wob.domain.LocalDateConverter;
 import com.zamek.wob.util.HasLogger;
 
 
@@ -45,6 +47,7 @@ public class Order implements HasLogger {
  	private String buyerEmail;  
 	
 	@Column(name=COL_ORDER_DATE, nullable=false)
+	@Convert(converter = LocalDateConverter.class)
 	private LocalDate orderDate;
 	
 	@Column(name=COL_ORDER_TOTAL_VALUE)

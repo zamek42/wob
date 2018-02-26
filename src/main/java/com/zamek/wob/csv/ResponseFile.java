@@ -3,18 +3,32 @@ package com.zamek.wob.csv;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+
+import com.zamek.wob.domain.ConvertException;
 
 public class ResponseFile implements AutoCloseable {
 
-	private final static String LINE_NUMBER = "LineNumber";	//$NON-NLS-1$
-	private final static String STATUS = "Status";	//$NON-NLS-1$
-	private final static String MESSAGE = "Message"; //$NON-NLS-1$
-	private final static String RECORD_SEPARATOR = "\n"; //$NON-NLS-1$
+	public final static String LINE_NUMBER = "LineNumber";	//$NON-NLS-1$
+	public final static String STATUS = "Status";	//$NON-NLS-1$
+	public final static String MESSAGE = "Message"; //$NON-NLS-1$
+	
+	public final static Object[] HEADER = new Object[] {LINE_NUMBER, STATUS, MESSAGE };
+	
+	public final static String ST_STATUS_OK = "OK";	//$NON-NLS-1$
+	public final static String ST_STATUS_ERROR = "ERROR";  //$NON-NLS-1$
 	
 	public enum Status {
-		OK, ERROR
+		OK, ERROR;
+		
+		public static Status byString(String s) throws ConvertException {
+			switch(s.toUpperCase()) {
+			case ST_STATUS_OK : return OK;
+			case ST_STATUS_ERROR : return ERROR;
+			default:
+				throw new ConvertException("Unknown response status"); //$NON-NLS-1$
+			}
+		}
 	}
 	
 	private String fileName;
@@ -25,11 +39,10 @@ public class ResponseFile implements AutoCloseable {
 		this.fileName=name;
 	}
 	
-	public void open() throws IOException {
-		CSVFormat csvFileFormat = CSVFormat.DEFAULT.withRecordSeparator(RECORD_SEPARATOR); 		
+	public void open() throws IOException {		 		
 		this.writer = new FileWriter(this.fileName);
-		this.printer = new CSVPrinter(this.writer, csvFileFormat);
-		this.printer.printRecord(new Object[] {LINE_NUMBER, STATUS, MESSAGE});
+		this.printer = new CSVPrinter(this.writer, CSVImporter.CSV_FILE_FORMAT);
+		this.printer.printRecord(HEADER);
 	}
 
 	@Override

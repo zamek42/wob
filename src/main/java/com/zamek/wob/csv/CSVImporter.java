@@ -25,6 +25,40 @@ import com.zamek.wob.domain.orderitem.OrderItem;
 import com.zamek.wob.domain.orderitem.OrderItemBuilder;
 import com.zamek.wob.util.HasLogger;
 
+/**
+ * CSV importer class. 
+ * 
+ * <p>Try to process the given csv file as input csv.</p>
+ * <p>The result database has two tables Order_ and OrderItem</p> 
+ * 
+ * <p>Until the conversion it creates a response file which contains all linenumber with result. Format of response:</p>
+ * <ul>
+ * <li>LineNumber: line index from the input csv file.</li>
+ * <li>Status : Result status of conversion: OK or ERROR</li>
+ * <li>Message: reason of error or empty if the status is OK</li>
+ * </ul>
+ * 
+ *  
+ * <p>Fileds in csv:</p>
+ * <ul>
+	<li>LineNumber : line index, it must be exists in csv</li>
+	<li>OrderItemId : primary key for OrderItem, it must be exists in csv  and it cannot be duplicated in the target database</li>  
+	<li>OrderId : primary key for Order, it must be exists in csv  and it cannot be duplicated in the target database</li>
+	<li>BuyerName : name of the buyer, it must be exists in csv</li>
+	<li>BuyerEmail : email of buyer, it must be exists in csv and it must be valid email</li> 
+	<li>Address : Address of buyer, it must be exists in csv</li>
+	<li>PostCode : Postcode of buyer, it must be exists in csv</li>
+	<li>SalePrice : SalePrice, it must be exists in csv and minimum value is 1.0</li>
+	<li>ShippingPrice : Shipping price, it must be exists in csv and minimum value is 0.0</li>
+	<li>SKU : I don't know what is it</li>
+	<li>Status : Status of ordering, it must be exists in csv values IN_STOCK or OUT_OF_STOCK</li>
+	<li>OrderDate : Date of ordering, it can be empty. It needs to set today date if it is empty. </li>
+	</ul>
+ *
+ * 
+ * @author zamek
+ *
+ */
 public class CSVImporter implements HasLogger{
 
 	@SuppressWarnings("unused")
@@ -46,6 +80,10 @@ public class CSVImporter implements HasLogger{
 	public static final String HEADER[] = new String[] {LINE_NUMBER, ORDER_ITEM_ID, ORDER_ID, BUYER_NAME, 
 			 											BUYER_EMAIL, ADDRESS, POST_CODE, SALE_PRICE, SHIPPING_PRICE, 
 			 											SKU, STATUS, ORDER_DATE};
+	
+	public static final CSVFormat CSV_FILE_FORMAT = CSVFormat.DEFAULT.withDelimiter(Consts.FIELD_DELIMITER).withFirstRecordAsHeader()
+														.withIgnoreEmptyLines().withRecordSeparator(Consts.RECORD_SEPARATOR);
+	
 
 	private String inputFileName;
 	private String responseFileName;
@@ -56,6 +94,15 @@ public class CSVImporter implements HasLogger{
 	private Map<Order, List<OrderItem>> orders;
 	private EntityManager entityManager;
 	
+	/**
+	 * Constructor of CSVImporter
+	 * 
+	 * Simple stores the arguments, but not starts the conversion. 
+	 * 
+	 * @param inputFileName name of the input csv file (Coming from config)
+	 * @param responseFileName name of the response csv file (Coming from config)
+	 * @param em Entity Manager for the database
+	 */
 	public CSVImporter(String inputFileName, String responseFileName, EntityManager em) {
 		this.inputFileName = inputFileName;
 		this.responseFileName = responseFileName;
@@ -64,6 +111,8 @@ public class CSVImporter implements HasLogger{
 	}
 		
 	/**
+	 * After a conversion it contains the valid (successfully converted) number of rows
+	 * 
 	 * @return the validRows
 	 */
 	public int getValidRows() {
@@ -71,32 +120,47 @@ public class CSVImporter implements HasLogger{
 	}
 
 	/**
+	 * After a conversion it contains the number of error rows
+	 *  
 	 * @return the errorRows
 	 */
 	public int getErrorRows() {
 		return this.errorRows;
 	}
 
+	/**
+	 * After a conversion it contains the all number of processed rows  
+	 * 
+	 * @return the processedRows
+	 */
+	public int getProcessedRows() {
+		return this.lines;
+	}
+
+	/**
+	 * Getting orders map for tests
+	 * 
+	 * @return Map of orders
+	 */
 	public Map<Order, List<OrderItem>> getOrders() {
 		return this.orders;
 	}
 	
-	public void process() {
+	/**
+	 * Starting process
+	 * 
+	 * @return true if the conversion finished successfully or flase if something went wrong
+	 */
+	public boolean process() {
 		try (Reader in = new FileReader(this.inputFileName)) {
 			try (ResponseFile r = new ResponseFile(this.responseFileName)) {
 				r.open();
 				
 				this.response = r;
 				
-				CSVFormat csvFileFormat = CSVFormat.DEFAULT.withDelimiter(Consts.FIELD_DELIMITER).withFirstRecordAsHeader()
-						.withIgnoreEmptyLines().withRecordSeparator(Consts.RECORD_SEPARATOR);
-
-				
-				try (CSVParser csvFileParser = new CSVParser(in, csvFileFormat) ) {						
+				try (CSVParser csvFileParser = new CSVParser(in, CSV_FILE_FORMAT) ) {						
 					for (CSVRecord record : csvFileParser.getRecords()) {							
 						++this.lines;
-						if (this.lines==1) //Skip header
-							continue;
 						
 						int lineNumber=this.lines;
 						try {
@@ -106,20 +170,35 @@ public class CSVImporter implements HasLogger{
 							this.response.message(this.lines, ResponseFile.Status.ERROR, "Linenumber format error"+e.getMessage());  //$NON-NLS-1$
 						}
 						processLine(record, lineNumber);
+						System.out.print(String.format("\r%10d.", Integer.valueOf(lineNumber))); //$NON-NLS-1$
 					}
 				}
-				
+				System.out.println();
 				saveLines();
+				return true;
 			}
 			catch (Exception e) { // response
-				getLogger().error(String.format("Cannot open response file &s : %s ",this.responseFileName, e.getMessage())); //$NON-NLS-1$
+				getLogger().error(String.format("Cannot open response file %s : %s ",this.responseFileName, e.getMessage())); //$NON-NLS-1$
+				System.out.print("\rSomething went wrong, details in log\n"); //$NON-NLS-1$
+				return false;
 			}
 		}
 		catch (IOException e) { //Reader
 			getLogger().error(String.format("Cannot open input file %s: %s", this.inputFileName,e.getMessage())); //$NON-NLS-1$
+			System.out.print("\rSomething went wrong, details in log\n"); //$NON-NLS-1$
+			return false;
 		}			
 	}
 
+	/**
+	 * Checking an Order and OrderItem in the Database.
+	 * 
+	 * @param order Order object
+	 * @param item OrderItem object
+	 * @param lineNumber LineNuumber for error messages
+	 * @return true if the given order and orderItem is not exist in the database
+	 * @throws IOException throws an IOEXception if an error message makes a mistake
+	 */
 	private boolean checkDb(Order order, OrderItem item, int lineNumber) throws IOException {
 		Long fid = order.getId();
 		
@@ -135,6 +214,18 @@ public class CSVImporter implements HasLogger{
 		return true;
 	}
 
+	/**
+	 * Add an Order/OrderItem pair to the memory map.  
+	 * 
+	 * if an Order isn't exists in the keyset of the map, it creates a new key with an OrderItem list
+	 * If an orderItem exists in the list of given Order, it doesn't append it and creates an error message
+	 * 
+	 * @param order Order object
+	 * @param orderItem OrderItem object
+	 * @param lineNumber lineNumber for the error message
+	 * @return true if successfully added or false if something went wrong
+	 * @throws IOException if the error message makes a mistake
+	 */
 	private boolean addOrderItemPairs(Order order, OrderItem orderItem, int lineNumber) throws IOException {
 		if (this.orders.containsKey(order)) {
 			List<OrderItem> items = this.orders.get(order);
@@ -152,6 +243,12 @@ public class CSVImporter implements HasLogger{
 		return true;
 	}
 	
+	/**
+	 * Try to create an Order/OrderItem object from the CSV. 
+	 * 
+	 * @param record CSV line as a Record
+	 * @param lineNumber LineNumber 
+	 */
 	private void processLine(CSVRecord record, int lineNumber) {
 		try {
 			try {
@@ -200,6 +297,9 @@ public class CSVImporter implements HasLogger{
 		}
 	}
 	
+	/**
+	 * Save all processed Order/OrderItem objects to the database
+	 */
 	private void saveLines() {
 		if (this.orders.isEmpty()) {
 			getLogger().warn("Orders list is empty!"); //$NON-NLS-1$
@@ -222,6 +322,11 @@ public class CSVImporter implements HasLogger{
 		}
 	}
 	
+	/**
+	 * Save an Order/OrderItem+ objects to the database
+	 *  
+	 * @param entry Map entry to save (Order/OrderItems+)
+	 */
 	private void processOrder(Map.Entry<Order, List<OrderItem>> entry) {
 		float total = 0;
 		Order order = entry.getKey();
@@ -232,7 +337,6 @@ public class CSVImporter implements HasLogger{
 		order.setOrderTotalValue(total);
 	
 		this.entityManager.persist(order);
-		this.entityManager.flush();
 		
 		for(OrderItem i:entry.getValue()) {
 			i.setOrder(order);

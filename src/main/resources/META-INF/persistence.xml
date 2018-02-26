@@ -3,16 +3,11 @@
     xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
 
-    <persistence-unit name="TestPersistence" transaction-type="RESOURCE_LOCAL">
+    <persistence-unit name="Persistence" transaction-type="RESOURCE_LOCAL">
 
         <class>com.zamek.wob.domain.order.Order</class>
         <class>com.zamek.wob.domain.orderitem.OrderItem</class>
-
-        <properties>
-  			<property name="javax.persistence.jdbc.driver" value="org.hsqldb.jdbcDriver"/>
-      		<property name="javax.persistence.jdbc.url" value="jdbc:hsqldb:mem:testdb"/>
-      		<property name="javax.persistence.jdbc.user" value="sa"/>
-      		<property name="javax.persistence.jdbc.password" value=""/>        
-      	</properties>
+		<class>com.zamek.wob.domain.LocalDateConverter</class>
+		
     </persistence-unit>
 </persistence>

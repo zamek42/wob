@@ -11,22 +11,43 @@ import org.apache.commons.validator.routines.EmailValidator;
 import com.zamek.wob.domain.ConvertException;
 import com.zamek.wob.util.HasLogger;
 
-
+/**
+ * Builder for Order object. 
+ * 
+ *  It can build an Order obejct if every properties are valid 
+ *  It returns an Optional &lt;Order&gt; which is contains a vlaid Order or empty if the Order is not valid.
+ *  
+ * @author zamek
+ *
+ */
 public class OrderBuilder implements HasLogger {
 
 	@SuppressWarnings("unused")
 	private final static boolean DEBUG=true;
 	
+	/**
+	 * Default date format
+	 */
 	public final static String DATE_FORMAT = "yyyy-MM-dd"; //$NON-NLS-1$
 	
 	private Order order;
 	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
+	/**
+	 * Constructor for OrderBuilder
+	 */
 	public OrderBuilder() {
 		this.order = new Order();
 		this.order.setOrderDate(LocalDate.now());
 	}
 	
+	/**
+	 * Setting Id for Order
+	 * 
+	 * @param id OrderId from CSV
+	 * @return reference to OrderBuilder
+	 * @throws ConvertException if id is not a valid number
+	 */
 	public OrderBuilder orderId(String id) throws ConvertException {
 		try {
 			this.order.setId(Long.valueOf(Long.parseLong(id)));
@@ -37,6 +58,13 @@ public class OrderBuilder implements HasLogger {
 		return this;
 	}
 	
+	/**
+	 * Setting Buyer's name
+	 * 
+	 * @param bn name of the BUyer from CSV
+	 * @return reference to OrderBuilder
+	 * @throws ConvertException of name is blank
+	 */
 	public OrderBuilder buyerName(String bn) throws ConvertException {
 		if (StringUtils.isBlank(bn))
 			throw new ConvertException("Buyer's name is empty"); //$NON-NLS-1$
@@ -44,6 +72,13 @@ public class OrderBuilder implements HasLogger {
 		return this;
 	}
 	
+	/**
+	 * Setting Buyer's email 
+	 *  
+	 * @param e Buyer's email from CSV
+	 * @return reference to OrderBuilder
+	 * @throws ConvertException if email is blank or not valid
+	 */
  	public OrderBuilder buyerEmail(String e) throws ConvertException {
  		if (StringUtils.isNotBlank(e) && EmailValidator.getInstance().isValid(e))
  			this.order.setBuyerEmail(e);
@@ -52,6 +87,13 @@ public class OrderBuilder implements HasLogger {
  		return this;
  	}
 	
+ 	/**
+ 	 * Setting date 
+ 	 * 
+ 	 * @param d Date from CSV
+ 	 * @return reference to OrderBuilder
+ 	 * @throws ConvertException date is not parseable
+ 	 */
 	public OrderBuilder orderDate(String d) throws ConvertException {
 		try {
 		this.order.setOrderDate(StringUtils.isBlank(d) 
@@ -64,21 +106,22 @@ public class OrderBuilder implements HasLogger {
 		return this;
 	}
 	
-	public OrderBuilder orderTotalValue (String value) throws ConvertException {
-		try {
-			this.order.setOrderTotalValue(Float.parseFloat(value));
-		}
-		catch (NumberFormatException e) {
-			throw new ConvertException("OrderTotalValue error:"+e.getMessage()); //$NON-NLS-1$
-		}
-		return this;
-	}
-	
+	/**
+	 * Setting address
+	 * @param address address from CSV
+	 * @return reference to OrderBuilder
+	 */
 	public OrderBuilder address(String address) {
 		this.order.setAddress(address);
 		return this;
 	}
 	
+	/**
+	 * Setting PostCode
+	 * @param pc PostCOde from CSV
+	 * @return reference to OrderBuilder
+	 * @throws NumberFormatException if not parseable
+	 */
 	public OrderBuilder postCode (String pc) throws NumberFormatException {
 		this.order.setPostCode(Integer.parseInt(pc));
 		return this;
@@ -89,7 +132,6 @@ public class OrderBuilder implements HasLogger {
 	 * 
 	 * @return true if item is correct or false if something went wrong
 	 */
-
 	private boolean check() {
 		String email = this.order.getBuyerEmail();
 		LocalDate date = this.order.getOrderDate();
@@ -102,6 +144,11 @@ public class OrderBuilder implements HasLogger {
 				&& this.order.getPostCode() != null;
 	}
 	
+	/**
+	 * Builds an Order or empty if order is not valid
+	 * 
+	 * @return the nuilt Order or Empty 
+	 */
 	public Optional<Order> get() {
 		return check() ? Optional.of(this.order) : Optional.empty();
 	}

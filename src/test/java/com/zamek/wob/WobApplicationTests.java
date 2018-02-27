@@ -8,13 +8,14 @@ import com.zamek.wob.domain.CSVTest;
 import com.zamek.wob.domain.DbTest;
 import com.zamek.wob.domain.DomainTest;
 
+
 @RunWith(Runner.class)
 @Suite.SuiteClasses ({
-//	DomainTest.class
-//	DbTest.class
+	DomainTest.class,
+	DbTest.class,
 	CSVTest.class
 })
 
 public class WobApplicationTests {
-
+//NC
 }

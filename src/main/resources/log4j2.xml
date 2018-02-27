@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration status="WARN" name="fuelingMonitor" packages="">
+	<properties>
+		<property name="pattern">%d %c{1.} [%t] %m%n</property>
+		<property name="appName">WOB</property>
+	</properties>
+
+	<Appenders>
+
+ 		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+		</Console>
+    
+		<RollingFile name="Errors" fileName="err.log"
+			filePattern="app-%d{MM-dd-yyyy}-err.log.gz">
+			<PatternLayout pattern="${pattern}" />
+			<Policies>
+				<TimeBasedTriggeringPolicy /> <!-- rotated every day -->
+				<sizeBasedTriggeringPolicy size="1MB" /> <!-- Or every 1Mb -->
+			</Policies>
+			<Filters>
+				<ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="NEUTRAL" />
+				<ThresholdFilter level="FATAL" onMatch="ACCEPT" onMismatch="NEUTRAL" />		
+				<ThresholdFilter level="TRACE" onMatch="DENY" onMismatch="DENY" />
+			</Filters>
+		</RollingFile>
+
+		<RollingFile name="Info" fileName="wob.log"
+			filePattern="app-%d{MM-dd-yyyy}-wob.csv.gz">
+			<PatternLayout pattern="%d{yyyy.MM.dd HH:mm};%msg%n" />
+			<Policies>
+				<sizeBasedTriggeringPolicy size="1MB" /> <!-- every 1Mb -->
+			</Policies>
+			<Filters>				
+				<ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="NEUTRAL" />
+				<ThresholdFilter level="WARN" onMatch="DENY" onMismatch="NEUTRAL" />
+				<ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="NEUTRAL" />
+			</Filters>
+		</RollingFile>
+
+	</Appenders>
+
+	<Loggers>
+		<Root level="TRACE">
+			<AppenderRef ref="Info" level="INFO" />
+			<AppenderRef ref="Errors" level="ERROR" />
+			<AppenderRef ref="Console"/> 
+
+		</Root>
+	</Loggers>
+
+</Configuration>

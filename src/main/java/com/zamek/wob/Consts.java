@@ -23,7 +23,37 @@ public interface Consts {
 	final static String RECORD_SEPARATOR = "\n"; //$NON-NLS-1$
 	
 	final static String FTP_KEY = "ftp."; 		 //$NON-NLS-1$
+
+	/**
+	 * Ftp user key
+	 */
+	final static String FTP_CONFIG_KEY_USER = FTP_KEY + "user"; 	 //$NON-NLS-1$
 	
+	/**
+	 * Ftp default user
+	 */
+	final static String FTP_CONFIG_DEF_USER = "wob"; //$NON-NLS-1$
+
+	/**
+	 * Ftp user password key
+	 */
+	final static String FTP_CONFIG_KEY_PASSWORD = FTP_KEY + "password"; 	 //$NON-NLS-1$
+	
+	/**
+	 * Ftp user password default value
+	 */
+	final static String FTP_CONFIG_DEF_PASSWORD = "42"; //$NON-NLS-1$
+	
+	/**
+	 * Ftp port key
+	 */
+	final static String FTP_CONFIG_KEY_PORT = FTP_KEY + "port"; 	 //$NON-NLS-1$
+	
+	/**
+	 * Ftp port default value (21)
+	 */
+	final static int FTP_CONFIG_DEF_PORT = 21;
+		
 	/**
 	 * Ftp host key in the config file
 	 */

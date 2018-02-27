@@ -6,6 +6,15 @@ import com.zamek.wob.config.Config;
 import com.zamek.wob.csv.CSVImporter;
 import com.zamek.wob.ftp.FtpUploader;
 
+/**
+ * Import CSV file to a Database Application.
+ *  
+ * Write an application which reads a CSV file, process the data in it and produces a response file.
+   After the conversion upload response file to a predefined ftp server
+ * 
+ * @author zamek
+ *
+ */
 public class WobApplication {
 	
 	private static void configNotExists() {

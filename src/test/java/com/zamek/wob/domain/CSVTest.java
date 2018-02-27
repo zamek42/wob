@@ -55,7 +55,6 @@ public class CSVTest {
 	private final static int NUMBER_OF_ITEMS = 10;
 	private final static SimpleDateFormat FORMATTER = new SimpleDateFormat(OrderBuilder.DATE_FORMAT);
 	private static int lineNumber = 1;
-	private static int generatedErrorLines=0;
 	
 	private static EntityManagerFactory emFactoryObj=Persistence.createEntityManagerFactory(TestConsts.PERSISTENCE_NAME);
 
@@ -68,7 +67,7 @@ public class CSVTest {
 		
 		try (FileWriter writer = new FileWriter(TEST_INPUT)){
 			try(CSVPrinter printer = new CSVPrinter(writer, CSVImporter.CSV_FILE_FORMAT)) {
-				printer.printRecord(CSVImporter.HEADER);
+				printer.printRecord((Object[])CSVImporter.HEADER);
 				for (int i=1;i<=NUMBER_OF_ORDERS;++i)
 					createLine(printer);
 			}

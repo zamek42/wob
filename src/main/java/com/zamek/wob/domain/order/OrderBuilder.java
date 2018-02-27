@@ -1,8 +1,8 @@
 package com.zamek.wob.domain.order;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
@@ -31,14 +31,14 @@ public class OrderBuilder implements HasLogger {
 	public final static String DATE_FORMAT = "yyyy-MM-dd"; //$NON-NLS-1$
 	
 	private Order order;
-	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+	private SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
 
 	/**
 	 * Constructor for OrderBuilder
 	 */
 	public OrderBuilder() {
 		this.order = new Order();
-		this.order.setOrderDate(LocalDate.now());
+		this.order.setOrderDate(new Date());
 	}
 	
 	/**
@@ -97,10 +97,10 @@ public class OrderBuilder implements HasLogger {
 	public OrderBuilder orderDate(String d) throws ConvertException {
 		try {
 		this.order.setOrderDate(StringUtils.isBlank(d) 
-				? LocalDate.now()
-				: LocalDate.parse(d, this.formatter));
+				? new Date()
+				: this.formatter.parse(d));
 		}
-		catch (DateTimeParseException e) {
+		catch (ParseException e) {
 			throw new ConvertException("order date error:"+e.getMessage()); //$NON-NLS-1$
 		}
 		return this;
@@ -134,12 +134,9 @@ public class OrderBuilder implements HasLogger {
 	 */
 	private boolean check() {
 		String email = this.order.getBuyerEmail();
-		LocalDate date = this.order.getOrderDate();
-		LocalDate now = LocalDate.now();
 		return this.order.getId() != null 
 				&& StringUtils.isNotBlank(this.order.getBuyerName())
 				&& StringUtils.isNotBlank(email) && EmailValidator.getInstance().isValid(email)
-				&& ( date.isBefore(now) || date.isEqual(now) )
 				&& StringUtils.isNotBlank(this.order.getAddress())
 				&& this.order.getPostCode() != null;
 	}

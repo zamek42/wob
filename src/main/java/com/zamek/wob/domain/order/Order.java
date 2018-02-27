@@ -1,15 +1,12 @@
 package com.zamek.wob.domain.order;
 
-
-import java.time.LocalDate;
+import java.util.Date;
 
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.zamek.wob.domain.LocalDateConverter;
 import com.zamek.wob.util.HasLogger;
 
 
@@ -20,6 +17,7 @@ public class Order implements HasLogger {
 	@SuppressWarnings("unused")
 	private final static boolean DEBUG=true;
 	
+	//TODO Please check the name of the order table, because order is keyword in databases
 	public final static String TABLE_NAME = "order_"; //$NON-NLS-1$  order is not an acceptable name for database
 	
 	public final static String COL_ID = "OrderId"; //$NON-NLS-1$
@@ -47,8 +45,7 @@ public class Order implements HasLogger {
  	private String buyerEmail;  
 	
 	@Column(name=COL_ORDER_DATE, nullable=false)
-	@Convert(converter = LocalDateConverter.class)
-	private LocalDate orderDate;
+	private Date orderDate;
 	
 	@Column(name=COL_ORDER_TOTAL_VALUE)
 	private float orderTotalValue;
@@ -108,14 +105,14 @@ public class Order implements HasLogger {
 	/**
 	 * @return the orderDate
 	 */
-	public LocalDate getOrderDate() {
+	public Date getOrderDate() {
 		return this.orderDate;
 	}
 
 	/**
 	 * @param orderDate the orderDate to set
 	 */
-	public void setOrderDate(LocalDate orderDate) {
+	public void setOrderDate(Date orderDate) {
 		this.orderDate = orderDate;
 	}
 

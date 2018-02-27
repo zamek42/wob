@@ -1,11 +1,11 @@
 package com.zamek.wob.domain;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.time.LocalDate;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -32,6 +32,7 @@ public class DomainTest {
 	private final static String NAME="Zaphod Beeblebrox"; //$NON-NLS-1$
 	private final static String DATE ="2000-10-20";  //$NON-NLS-1$
 	private final static float FLOAT_LIMIT = 0.1f;
+	private static SimpleDateFormat formatter = new SimpleDateFormat(OrderBuilder.DATE_FORMAT);
 	
 	private OrderItemBuilder correctItemBuilder;
 	private OrderBuilder correctOrderBuilder;
@@ -63,29 +64,34 @@ public class DomainTest {
 	
 	@Test
 	public void builderTests() {
-		Optional<Order> o = this.correctOrderBuilder.get();
-		assertTrue(o.isPresent());
-		Order order = o.get();
-		assertEquals(order.getId(), Long.valueOf(ORDER_ID));
-		assertEquals(order.getBuyerName(), NAME);
-		assertEquals(order.getAddress(), ADDRESS);
-		assertEquals(order.getBuyerEmail(), EMAIL);
-		assertEquals(order.getPostCode(), Integer.valueOf(ZIP));
-		assertEquals(order.getOrderDate(), LocalDate.parse(DATE));
-		
-		Optional<OrderItem> oi = this.correctItemBuilder.get();
-		assertTrue(oi.isPresent());
-		OrderItem item = oi.get();
-		assertEquals(item.getId(), Long.valueOf(ITEM_ID));
-		assertEquals(item.getSalePrice(), SALE_PRICE, FLOAT_LIMIT);
-		assertTrue(item.getSalePrice()>=1.0f);
-		assertTrue(item.getShippingPrice() >= 0.0f);
-		assertEquals(item.getShippingPrice(), SHIPPING_PRICE, FLOAT_LIMIT);
-		assertEquals(item.getTotalItemPrice(), TOTAL_PRICE, FLOAT_LIMIT);
-		assertEquals(item.getSalePrice() + item.getShippingPrice(), item.getTotalItemPrice(), FLOAT_LIMIT);
-		assertEquals(item.getOrder(), order);
-		assertEquals(item.getSKU(), SKU);
-		assertEquals(item.getStatus(), OrderItemStatus.IN_STOCK);
+		try {
+			Optional<Order> o = this.correctOrderBuilder.get();
+			assertTrue(o.isPresent());
+			Order order = o.get();
+			assertEquals(order.getId(), Long.valueOf(ORDER_ID));
+			assertEquals(order.getBuyerName(), NAME);
+			assertEquals(order.getAddress(), ADDRESS);
+			assertEquals(order.getBuyerEmail(), EMAIL);
+			assertEquals(order.getPostCode(), Integer.valueOf(ZIP));
+			assertEquals(order.getOrderDate(), formatter.parse(DATE));
+			
+			Optional<OrderItem> oi = this.correctItemBuilder.get();
+			assertTrue(oi.isPresent());
+			OrderItem item = oi.get();
+			assertEquals(item.getId(), Long.valueOf(ITEM_ID));
+			assertEquals(item.getSalePrice(), SALE_PRICE, FLOAT_LIMIT);
+			assertTrue(item.getSalePrice()>=1.0f);
+			assertTrue(item.getShippingPrice() >= 0.0f);
+			assertEquals(item.getShippingPrice(), SHIPPING_PRICE, FLOAT_LIMIT);
+			assertEquals(item.getTotalItemPrice(), TOTAL_PRICE, FLOAT_LIMIT);
+			assertEquals(item.getSalePrice() + item.getShippingPrice(), item.getTotalItemPrice(), FLOAT_LIMIT);
+			assertEquals(item.getOrder(), order);
+			assertEquals(item.getSKU(), SKU);
+			assertEquals(item.getStatus(), OrderItemStatus.IN_STOCK);
+		}
+		catch (Exception e) {
+			fail(e.getMessage());
+		}
 	}
 	
 	@Test
@@ -197,10 +203,10 @@ public class DomainTest {
 		try {
 			this.correctOrderBuilder.orderDate(null);
 			assertTrue(this.correctOrderBuilder.get().isPresent());
-			assertEquals(this.correctOrderBuilder.get().get().getOrderDate(), LocalDate.now());
+			assertEquals(this.correctOrderBuilder.get().get().getOrderDate(), new Date());
 			this.correctOrderBuilder.orderDate(""); //$NON-NLS-1$
 			assertTrue(this.correctOrderBuilder.get().isPresent());
-			assertEquals(this.correctOrderBuilder.get().get().getOrderDate(), LocalDate.now());
+			assertEquals(this.correctOrderBuilder.get().get().getOrderDate(), new Date());
 		}
 		catch (@SuppressWarnings("unused") ConvertException e) {
 			fail();			

@@ -9,12 +9,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +21,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
@@ -33,7 +29,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.zamek.wob.Consts;
 import com.zamek.wob.TestConsts;
 import com.zamek.wob.csv.CSVImporter;
 import com.zamek.wob.csv.ResponseFile;
@@ -41,6 +36,7 @@ import com.zamek.wob.domain.order.Order;
 import com.zamek.wob.domain.order.OrderBuilder;
 import com.zamek.wob.domain.orderitem.OrderItem;
 import com.zamek.wob.domain.orderitem.OrderItemStatus;
+import com.zamek.wob.util.DateUtils;
 
 public class CSVTest {
 
@@ -57,7 +53,7 @@ public class CSVTest {
 	private final static LocalDate DATE = LocalDate.now().minus(Period.of(5, 1, 20));
 	private final static int NUMBER_OF_ORDERS = 10;
 	private final static int NUMBER_OF_ITEMS = 10;
-	private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(OrderBuilder.DATE_FORMAT);
+	private final static SimpleDateFormat FORMATTER = new SimpleDateFormat(OrderBuilder.DATE_FORMAT);
 	private static int lineNumber = 1;
 	private static int generatedErrorLines=0;
 	
@@ -111,7 +107,7 @@ public class CSVTest {
 		order.setBuyerName(BUYERS_NAME+lns);
 		order.setBuyerEmail(BUYERS_EMAIL);
 		order.setId(Long.valueOf(lineNumber));
-		order.setOrderDate(ld);
+		order.setOrderDate(DateUtils.asDate(ld));
 		order.setPostCode(Integer.parseInt(ZIP+lns));
 		List<OrderItem> itms = new ArrayList<>(NUMBER_OF_ITEMS);
 		float total = 0;

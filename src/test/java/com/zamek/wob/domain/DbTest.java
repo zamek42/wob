@@ -16,6 +16,7 @@ import com.zamek.wob.TestConsts;
 import com.zamek.wob.domain.order.Order;
 import com.zamek.wob.domain.orderitem.OrderItem;
 import com.zamek.wob.domain.orderitem.OrderItemStatus;
+import com.zamek.wob.util.DateUtils;
 
 
 public class DbTest {
@@ -46,7 +47,7 @@ public class DbTest {
 			order.setBuyerName(BUYERS_NAME);
 			order.setBuyerEmail(BUYERS_EMAIL);
 			order.setId(Long.valueOf(1));
-			order.setOrderDate(DATE);
+			order.setOrderDate(DateUtils.asDate(DATE));
 			order.setPostCode(ZIP);
 			order.setOrderTotalValue(42.0f);
 			em.persist(order);

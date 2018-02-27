@@ -1,4 +1,4 @@
-package com.zamek.wob.domain;
+package com.zamek.wob.util;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;

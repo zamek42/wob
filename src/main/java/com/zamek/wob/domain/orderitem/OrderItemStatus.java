@@ -1,5 +1,7 @@
 package com.zamek.wob.domain.orderitem;
 
+import com.zamek.wob.domain.ConvertException;
+
 public enum OrderItemStatus {
 	
 	IN_STOCK() {
@@ -18,25 +20,17 @@ public enum OrderItemStatus {
 			return ST_OUT_OF_STOCK;
 		}
 		
-	}, 
-	
-	UNKNOWN() {
-		@Override
-		public String toString() {
-			return "Unknown"; //$NON-NLS-1$
-		}
-
 	};
 
 	public final static String ST_IN_STOCK = "INSTOCK"; //$NON-NLS-1$
 	
 	public final static String ST_OUT_OF_STOCK = "OUTOFSTOCK"; //$NON-NLS-1$
 
-	public static OrderItemStatus byString(String st) {
+	public static OrderItemStatus byString(String st) throws ConvertException {
 		switch (st.toUpperCase()) {
 		case ST_IN_STOCK : return OrderItemStatus.IN_STOCK;
 		case ST_OUT_OF_STOCK : return OrderItemStatus.OUT_OF_STOCK;
-		default : return UNKNOWN;
+		default : throw new ConvertException("Unknown orderitem status:"+st); //$NON-NLS-1$
 		}
 	}
 	

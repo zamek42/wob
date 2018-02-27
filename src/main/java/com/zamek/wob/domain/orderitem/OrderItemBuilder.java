@@ -80,7 +80,7 @@ public class OrderItemBuilder implements HasLogger {
 		return this;
 	}
 	
-	public OrderItemBuilder status(String status) {
+	public OrderItemBuilder status(String status) throws ConvertException {
 		this.item.setStatus(OrderItemStatus.byString(status));
 		return this;
 	}
@@ -96,7 +96,7 @@ public class OrderItemBuilder implements HasLogger {
 				&& this.item.getSalePrice() >= 1.0f
 				&& this.item.getShippingPrice() >= 0.0f
 				&& this.item.getTotalItemPrice() >= 0.0f
-				&& this.item.getStatus() != OrderItemStatus.UNKNOWN;
+				&& this.item.getStatus() != null;
 	}
 	
 	private void postCalculation() {
